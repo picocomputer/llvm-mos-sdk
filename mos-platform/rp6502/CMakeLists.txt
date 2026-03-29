@@ -10,8 +10,10 @@ TYPE INCLUDE)
 install(FILES link.ld TYPE LIB)
 
 add_platform_object_file(rp6502-crt0-o crt0.o
+  callmain.s
   init-cpu.s
 )
+target_link_libraries(rp6502-crt0-o PRIVATE common-asminc)
 
 add_platform_library(rp6502-crt0
   exit.c
@@ -53,6 +55,7 @@ add_platform_library(rp6502-c
   getchar.c
   lrand.c
   lseek.c
+  mainargs.c
   open.c
   phi2.c
   putchar.c
@@ -62,7 +65,9 @@ add_platform_library(rp6502-c
   remove.c
   rename.c
   ria.s
-  stdin_opt.c
+  ria_attr.c
+  ria_execl.c
+  ria_execv.c
   syncfs.c
   write_xram.c
   write_xstack.c
