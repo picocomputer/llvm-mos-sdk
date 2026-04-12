@@ -109,6 +109,7 @@ long ria_call_long(unsigned char op);
 #define RIA_ATTR_LRAND 0x04
 #define RIA_ATTR_BEL 0x05
 #define RIA_ATTR_LAUNCHER 0x06
+#define RIA_ATTR_EXIT_CODE 0x07
 
 /* C API for the operating system. */
 
@@ -262,6 +263,13 @@ typedef struct {
   unsigned char log_size;
   unsigned char has_opacity_metadata; // bool
 } vga_mode4_asprite_t;
+
+typedef struct {
+  int x_pos_px;
+  int y_pos_px;
+  unsigned xram_sprite_ptr;
+  unsigned palette_ptr;
+} vga_mode5_sprite_t;
 
 #ifdef __cplusplus
 }
