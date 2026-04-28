@@ -68,6 +68,9 @@ add_platform_library(rp6502-c
   ria_attr.c
   ria_execl.c
   ria_execv.c
+  ria_readline_lastkey.c
+  ria_readline_peek.c
+  ria_readline_poke.c
   syncfs.c
   write_xram.c
   write_xstack.c

@@ -70,6 +70,9 @@ RIA_OP_GETCWD             = $2B
 RIA_OP_SETLABEL           = $2C
 RIA_OP_GETLABEL           = $2D
 RIA_OP_GETFREE            = $2E
+RIA_OP_RLN_LASTKEY        = $30
+RIA_OP_RLN_PEEK           = $31
+RIA_OP_RLN_POKE           = $32
 
 ; RIA attribute IDs
 RIA_ATTR_ERRNO_OPT        = $00
@@ -80,6 +83,8 @@ RIA_ATTR_LRAND            = $04
 RIA_ATTR_BEL              = $05
 RIA_ATTR_LAUNCHER         = $06
 RIA_ATTR_EXIT_CODE        = $07
+RIA_ATTR_SIGINT           = $08
+RIA_ATTR_RLN_CAPS         = $09
 
 ; 6522 VIA
 VIA             = $FFD0        ; VIA base address

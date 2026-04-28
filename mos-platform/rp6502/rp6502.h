@@ -99,6 +99,9 @@ long ria_call_long(unsigned char op);
 #define RIA_OP_SETLABEL 0x2C
 #define RIA_OP_GETLABEL 0x2D
 #define RIA_OP_GETFREE 0x2E
+#define RIA_OP_RLN_LASTKEY 0x30
+#define RIA_OP_RLN_PEEK 0x31
+#define RIA_OP_RLN_POKE 0x32
 
 /* RIA attribute IDs */
 
@@ -110,6 +113,8 @@ long ria_call_long(unsigned char op);
 #define RIA_ATTR_BEL 0x05
 #define RIA_ATTR_LAUNCHER 0x06
 #define RIA_ATTR_EXIT_CODE 0x07
+#define RIA_ATTR_SIGINT 0x08
+#define RIA_ATTR_RLN_CAPS 0x09
 
 /* C API for the operating system. */
 
@@ -154,6 +159,9 @@ int f_getcwd(char *name, int size);
 int f_setlabel(const char *name);
 int f_getlabel(const char *path, char *label);
 int f_getfree(const char *name, unsigned long *free, unsigned long *total);
+int ria_readline_lastkey (char* key, int size);
+int ria_readline_peek (char* peek, int size);
+int ria_readline_poke (const char* poke);
 
 /* XREG helper macros */
 
