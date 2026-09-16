@@ -33,10 +33,10 @@ struct __RP6502 {
   const unsigned char rx;
   const unsigned char vsync;
   unsigned char rw0;
-  unsigned char step0;
+  signed char step0;
   unsigned int addr0;
   unsigned char rw1;
-  unsigned char step1;
+  signed char step1;
   unsigned int addr1;
   unsigned char xstack;
   unsigned int errno_;
@@ -61,17 +61,17 @@ struct __RP6502 {
 
 void ria_push_long(unsigned long val);
 void ria_push_int(unsigned int val);
-#define ria_push_char(v) RIA.xstack = v
+#define ria_push_char(v) (RIA.xstack = (v))
 
 long ria_pop_long(void);
 int ria_pop_int(void);
-#define ria_pop_char() RIA.xstack
+#define ria_pop_char() (RIA.xstack)
 
 /* Set the RIA fastcall register */
 
 void ria_set_axsreg(unsigned long axsreg);
 void ria_set_ax(unsigned int ax);
-#define ria_set_a(v) RIA.a = v
+#define ria_set_a(v) (RIA.a = (v))
 
 /* Run an OS operation */
 
@@ -160,9 +160,12 @@ typedef struct {
 
 int xregn(char device, char channel, unsigned char address, unsigned count,
           ...);
-int phi2(void);     // deprecated, use ria_attr_*
-int code_page(int); // deprecated, use ria_attr_*
-long lrand(void);   // deprecated, use ria_attr_*
+int phi2(void)
+    __attribute__((deprecated("use ria_attr_get(RIA_ATTR_PHI2_KHZ)")));
+int code_page(int)
+    __attribute__((deprecated("use ria_attr_set(cp, RIA_ATTR_CODE_PAGE)")));
+long lrand(void)
+    __attribute__((deprecated("use ria_attr_get(RIA_ATTR_LRAND)")));
 int ria_execv(const char *path, char *const argv[]);
 int ria_execl(const char *path, ...);
 long ria_attr_get(unsigned char id);
@@ -199,116 +202,54 @@ int time_set(long long time);
                _2, _1, count, ...)                                             \
   count
 #define xreg_(...)                                                             \
-  xreg__(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+  xreg__(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 #define xreg(d, c, a, ...) xregn(d, c, a, xreg_(__VA_ARGS__), __VA_ARGS__)
-
-#define xreg_ria_keyboard(...) xreg(0, 0, 0, __VA_ARGS__)
-#define xreg_ria_mouse(...) xreg(0, 0, 1, __VA_ARGS__)
-#define xreg_ria_gamepad(...) xreg(0, 0, 2, __VA_ARGS__)
-#define xreg_ria_tablet(...) xreg(0, 0, 3, __VA_ARGS__)
-#define xreg_vga_canvas(...) xreg(1, 0, 0, __VA_ARGS__)
-#define xreg_vga_mode(...) xreg(1, 0, 1, __VA_ARGS__)
 
 /* XRAM structure helpers */
 
 #define xram0_struct_set(addr, type, member, val)                              \
-  RIA.addr0 = (unsigned)(&((type *)0)->member) + (unsigned)addr;               \
-  switch (sizeof(((type *)0)->member)) {                                       \
-  case 1:                                                                      \
-    RIA.rw0 = val;                                                             \
-    break;                                                                     \
-  case 2:                                                                      \
-    RIA.step0 = 1;                                                             \
-    RIA.rw0 = val & 0xff;                                                      \
-    RIA.rw0 = (val >> 8) & 0xff;                                               \
-    break;                                                                     \
-  case 4:                                                                      \
-    RIA.step0 = 1;                                                             \
-    RIA.rw0 = (unsigned long)val & 0xff;                                       \
-    RIA.rw0 = ((unsigned long)val >> 8) & 0xff;                                \
-    RIA.rw0 = ((unsigned long)val >> 16) & 0xff;                               \
-    RIA.rw0 = ((unsigned long)val >> 24) & 0xff;                               \
-    break;                                                                     \
-  }
+  do {                                                                         \
+    RIA.addr0 = (unsigned)(&((type *)0)->member) + (unsigned)(addr);           \
+    switch (sizeof(((type *)0)->member)) {                                     \
+    case 1:                                                                    \
+      RIA.rw0 = (val);                                                         \
+      break;                                                                   \
+    case 2:                                                                    \
+      RIA.step0 = 1;                                                           \
+      RIA.rw0 = (val) & 0xff;                                                  \
+      RIA.rw0 = ((val) >> 8) & 0xff;                                           \
+      break;                                                                   \
+    case 4:                                                                    \
+      RIA.step0 = 1;                                                           \
+      RIA.rw0 = (unsigned long)(val) & 0xff;                                   \
+      RIA.rw0 = ((unsigned long)(val) >> 8) & 0xff;                            \
+      RIA.rw0 = ((unsigned long)(val) >> 16) & 0xff;                           \
+      RIA.rw0 = ((unsigned long)(val) >> 24) & 0xff;                           \
+      break;                                                                   \
+    }                                                                          \
+  } while (0)
 
 #define xram1_struct_set(addr, type, member, val)                              \
-  RIA.addr1 = (unsigned)(&((type *)0)->member) + (unsigned)addr;               \
-  switch (sizeof(((type *)0)->member)) {                                       \
-  case 1:                                                                      \
-    RIA.rw1 = val;                                                             \
-    break;                                                                     \
-  case 2:                                                                      \
-    RIA.step1 = 1;                                                             \
-    RIA.rw1 = val & 0xff;                                                      \
-    RIA.rw1 = (val >> 8) & 0xff;                                               \
-    break;                                                                     \
-  case 4:                                                                      \
-    RIA.step1 = 1;                                                             \
-    RIA.rw1 = (unsigned long)val & 0xff;                                       \
-    RIA.rw1 = ((unsigned long)val >> 8) & 0xff;                                \
-    RIA.rw1 = ((unsigned long)val >> 16) & 0xff;                               \
-    RIA.rw1 = ((unsigned long)val >> 24) & 0xff;                               \
-    break;                                                                     \
-  }
-
-typedef struct {
-  unsigned char x_wrap; // bool
-  unsigned char y_wrap; // bool
-  int x_pos_px;
-  int y_pos_px;
-  int width_chars;
-  int height_chars;
-  unsigned xram_data_ptr;
-  unsigned xram_palette_ptr;
-  unsigned xram_font_ptr;
-} vga_mode1_config_t;
-
-typedef struct {
-  unsigned char x_wrap; // bool
-  unsigned char y_wrap; // bool
-  int x_pos_px;
-  int y_pos_px;
-  int width_tiles;
-  int height_tiles;
-  unsigned xram_data_ptr;
-  unsigned xram_palette_ptr;
-  unsigned xram_tile_ptr;
-} vga_mode2_config_t;
-
-typedef struct {
-  unsigned char x_wrap; // bool
-  unsigned char y_wrap; // bool
-  int x_pos_px;
-  int y_pos_px;
-  int width_px;
-  int height_px;
-  unsigned xram_data_ptr;
-  unsigned xram_palette_ptr;
-} vga_mode3_config_t;
-
-typedef struct {
-  int x_pos_px;
-  int y_pos_px;
-  unsigned xram_sprite_ptr;
-  unsigned char log_size;
-  unsigned char has_opacity_metadata; // bool
-} vga_mode4_sprite_t;
-
-typedef struct {
-  int transform[6];
-  int x_pos_px;
-  int y_pos_px;
-  unsigned xram_sprite_ptr;
-  unsigned char log_size;
-  unsigned char has_opacity_metadata; // bool
-} vga_mode4_asprite_t;
-
-typedef struct {
-  int x_pos_px;
-  int y_pos_px;
-  unsigned xram_sprite_ptr;
-  unsigned palette_ptr;
-} vga_mode5_sprite_t;
+  do {                                                                         \
+    RIA.addr1 = (unsigned)(&((type *)0)->member) + (unsigned)(addr);           \
+    switch (sizeof(((type *)0)->member)) {                                     \
+    case 1:                                                                    \
+      RIA.rw1 = (val);                                                         \
+      break;                                                                   \
+    case 2:                                                                    \
+      RIA.step1 = 1;                                                           \
+      RIA.rw1 = (val) & 0xff;                                                  \
+      RIA.rw1 = ((val) >> 8) & 0xff;                                           \
+      break;                                                                   \
+    case 4:                                                                    \
+      RIA.step1 = 1;                                                           \
+      RIA.rw1 = (unsigned long)(val) & 0xff;                                   \
+      RIA.rw1 = ((unsigned long)(val) >> 8) & 0xff;                            \
+      RIA.rw1 = ((unsigned long)(val) >> 16) & 0xff;                           \
+      RIA.rw1 = ((unsigned long)(val) >> 24) & 0xff;                           \
+      break;                                                                   \
+    }                                                                          \
+  } while (0)
 
 #ifdef __cplusplus
 }
