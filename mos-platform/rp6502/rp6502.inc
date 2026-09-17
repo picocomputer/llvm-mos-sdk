@@ -94,6 +94,25 @@ RIA_ATTR_CLK_RUN_CS       = $11
 RIA_ATTR_CLK_RUN_DS       = $12
 RIA_ATTR_CLK_RUN_S        = $13
 
+; PIX extended registers, the assembly form of xreg()
+.macro xreg device, channel, address, values:vararg
+    lda #(\device)
+    sta RIA_XSTACK
+    lda #(\channel)
+    sta RIA_XSTACK
+    lda #(\address)
+    sta RIA_XSTACK
+.irp value, \values
+    lda #(((\value) >> 8) & $FF)
+    sta RIA_XSTACK
+    lda #((\value) & $FF)
+    sta RIA_XSTACK
+.endr
+    lda #RIA_OP_XREG
+    sta RIA_OP
+    jsr RIA_SPIN
+.endm
+
 ; 6522 VIA
 VIA             = $FFD0        ; VIA base address
 VIA_PB          = VIA+$0       ; Port register B
