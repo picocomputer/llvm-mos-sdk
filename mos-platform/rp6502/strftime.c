@@ -25,7 +25,7 @@ size_t strftime(char *s, size_t maxsize, const char *format,
   if (ax < 0)
     return 0; /* errno set by OS */
   if ((unsigned)ax >= maxsize) {
-    RIA.op = RIA_OP_ZXSTACK;
+    zxstack();
     return 0; /* did not fit, per ISO C */
   }
   for (i = 0; i < (unsigned)ax; ++i)

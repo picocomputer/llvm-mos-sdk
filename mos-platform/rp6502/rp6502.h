@@ -196,6 +196,7 @@ int time_set(long long time);
 
 /* Extended memory */
 
+#define zxstack() ((void)(RIA.op = RIA_OP_ZXSTACK))
 #define xreg__(_16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3,  \
                _2, _1, count, ...)                                             \
   count
