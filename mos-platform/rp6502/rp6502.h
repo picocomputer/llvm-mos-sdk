@@ -158,8 +158,6 @@ typedef struct {
   char fname[255 + 1];
 } f_stat_t;
 
-int xregn(char device, char channel, unsigned char address, unsigned count,
-          ...);
 int phi2(void)
     __attribute__((deprecated("use ria_attr_get(RIA_ATTR_PHI2_KHZ)")));
 int code_page(int)
@@ -196,7 +194,7 @@ int ria_rln_peek(char *peek, unsigned char *pos);
 int ria_rln_poke(const char *poke);
 int time_set(long long time);
 
-/* XREG helper macros */
+/* Extended memory */
 
 #define xreg__(_16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3,  \
                _2, _1, count, ...)                                             \
@@ -204,8 +202,12 @@ int time_set(long long time);
 #define xreg_(...)                                                             \
   xreg__(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 #define xreg(d, c, a, ...) xregn(d, c, a, xreg_(__VA_ARGS__), __VA_ARGS__)
-
-/* XRAM structure helpers */
+int xregn(char device, char channel, unsigned char address, unsigned count,
+          ...);
+void xram0_read(void *dest, unsigned src, unsigned count);
+void xram1_read(void *dest, unsigned src, unsigned count);
+void xram0_write(unsigned dest, const void *src, unsigned count);
+void xram1_write(unsigned dest, const void *src, unsigned count);
 
 #define xram0_struct_set(addr, type, member, val)                              \
   do {                                                                         \
