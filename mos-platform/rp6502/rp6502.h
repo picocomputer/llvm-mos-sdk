@@ -208,6 +208,9 @@ void xram0_read(void *dest, unsigned src, unsigned count);
 void xram1_read(void *dest, unsigned src, unsigned count);
 void xram0_write(unsigned dest, const void *src, unsigned count);
 void xram1_write(unsigned dest, const void *src, unsigned count);
+void xram0_set(unsigned dest, unsigned char val, unsigned count);
+void xram1_set(unsigned dest, unsigned char val, unsigned count);
+void xram_move(unsigned dest, unsigned src, unsigned count);
 
 #define xram0_struct_set(addr, type, member, val)                              \
   do {                                                                         \
