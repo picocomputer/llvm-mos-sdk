@@ -84,8 +84,8 @@ add_platform_library(rp6502-c
   write_xram.c
   write_xstack.c
   write.c
-  xram_read.c
-  xram_write.c
+  xram_read.s
+  xram_write.s
   xregn.c
 )
 
