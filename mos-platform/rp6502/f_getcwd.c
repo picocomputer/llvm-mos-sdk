@@ -6,7 +6,7 @@ int f_getcwd(char *name, int size) {
   int i, ax;
   ax = ria_call_int(RIA_OP_GETCWD);
   if (ax > size) {
-    zxstack();
+    ria_drop();
     errno = ENOMEM;
     return -1;
   }

@@ -67,6 +67,8 @@ long ria_pop_long(void);
 int ria_pop_int(void);
 #define ria_pop_char() (RIA.xstack)
 
+#define ria_drop() ((void)(RIA.op = RIA_OP_DROP_XSTACK))
+
 /* Set the RIA fastcall register */
 
 void ria_set_axsreg(unsigned long axsreg);
@@ -81,7 +83,7 @@ long ria_call_long(unsigned char op);
 /* OS operation numbers */
 
 #define RIA_OP_EXIT 0xFF
-#define RIA_OP_ZXSTACK 0x00
+#define RIA_OP_DROP_XSTACK 0x00
 #define RIA_OP_XREG 0x01
 #define RIA_OP_ARGV 0x08
 #define RIA_OP_EXEC 0x09
@@ -196,7 +198,6 @@ int time_set(long long time);
 
 /* Extended memory */
 
-#define zxstack() ((void)(RIA.op = RIA_OP_ZXSTACK))
 #define xreg__(_16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3,  \
                _2, _1, count, ...)                                             \
   count

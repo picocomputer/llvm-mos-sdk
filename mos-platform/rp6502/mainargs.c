@@ -25,7 +25,7 @@ void __do_initmainargs(void) {
 
   void *buf = __argv_mem((size_t)(unsigned int)size);
   if (!buf) {
-    zxstack();
+    ria_drop();
     return;
   }
 
