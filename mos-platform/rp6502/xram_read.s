@@ -13,9 +13,21 @@ xram0_read:
     stx RIA_ADDR0+1
     lda #1
     sta RIA_STEP0
-    ldy #0
     ldx __rc5
-    beq .Lxram0_read_tail
+    inx
+    lda __rc4                   ; the whole eights of the partial page
+    and #$F8
+    tay
+    beq .Lxram0_read_next
+    clc                         ; start 256 - Y bytes back so Y wraps at the end
+    adc __rc2
+    sta __rc2
+    bcs 1f
+    dec __rc3
+1:  tya
+    eor #$FF
+    tay
+    iny
 .Lxram0_read_page:
     .rept 8
     lda RIA_RW0
@@ -24,13 +36,12 @@ xram0_read:
     .endr
     bne .Lxram0_read_page
     inc __rc3
+.Lxram0_read_next:
     dex
     bne .Lxram0_read_page
-.Lxram0_read_tail:
     lda __rc4
-    beq .Lxram0_read_done
     and #7
-    beq .Lxram0_read_eights
+    beq .Lxram0_read_done
     tax
 .Lxram0_read_rest:
     lda RIA_RW0
@@ -38,21 +49,6 @@ xram0_read:
     iny
     dex
     bne .Lxram0_read_rest
-.Lxram0_read_eights:
-    lda __rc4
-    lsr
-    lsr
-    lsr
-    beq .Lxram0_read_done
-    tax
-.Lxram0_read_eight:
-    .rept 8
-    lda RIA_RW0
-    sta (__rc2),y
-    iny
-    .endr
-    dex
-    bne .Lxram0_read_eight
 .Lxram0_read_done:
     rts
 .size xram0_read, .-xram0_read
@@ -65,9 +61,21 @@ xram1_read:
     stx RIA_ADDR1+1
     lda #1
     sta RIA_STEP1
-    ldy #0
     ldx __rc5
-    beq .Lxram1_read_tail
+    inx
+    lda __rc4                   ; the whole eights of the partial page
+    and #$F8
+    tay
+    beq .Lxram1_read_next
+    clc                         ; start 256 - Y bytes back so Y wraps at the end
+    adc __rc2
+    sta __rc2
+    bcs 1f
+    dec __rc3
+1:  tya
+    eor #$FF
+    tay
+    iny
 .Lxram1_read_page:
     .rept 8
     lda RIA_RW1
@@ -76,13 +84,12 @@ xram1_read:
     .endr
     bne .Lxram1_read_page
     inc __rc3
+.Lxram1_read_next:
     dex
     bne .Lxram1_read_page
-.Lxram1_read_tail:
     lda __rc4
-    beq .Lxram1_read_done
     and #7
-    beq .Lxram1_read_eights
+    beq .Lxram1_read_done
     tax
 .Lxram1_read_rest:
     lda RIA_RW1
@@ -90,21 +97,6 @@ xram1_read:
     iny
     dex
     bne .Lxram1_read_rest
-.Lxram1_read_eights:
-    lda __rc4
-    lsr
-    lsr
-    lsr
-    beq .Lxram1_read_done
-    tax
-.Lxram1_read_eight:
-    .rept 8
-    lda RIA_RW1
-    sta (__rc2),y
-    iny
-    .endr
-    dex
-    bne .Lxram1_read_eight
 .Lxram1_read_done:
     rts
 .size xram1_read, .-xram1_read

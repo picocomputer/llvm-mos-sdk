@@ -160,12 +160,6 @@ typedef struct {
   char fname[255 + 1];
 } f_stat_t;
 
-int phi2(void)
-    __attribute__((deprecated("use ria_attr_get(RIA_ATTR_PHI2_KHZ)")));
-int code_page(int)
-    __attribute__((deprecated("use ria_attr_set(cp, RIA_ATTR_CODE_PAGE)")));
-long lrand(void)
-    __attribute__((deprecated("use ria_attr_get(RIA_ATTR_LRAND)")));
 int ria_execv(const char *path, char *const argv[]);
 int ria_execl(const char *path, ...);
 long ria_attr_get(unsigned char id);
@@ -198,12 +192,8 @@ int time_set(long long time);
 
 /* Extended memory */
 
-#define xreg__(_16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3,  \
-               _2, _1, count, ...)                                             \
-  count
-#define xreg_(...)                                                             \
-  xreg__(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
-#define xreg(d, c, a, ...) xregn(d, c, a, xreg_(__VA_ARGS__), __VA_ARGS__)
+#define xreg(d, c, a, ...)                                                     \
+  xregn(d, c, a, sizeof((long[]){__VA_ARGS__}) / sizeof(long), __VA_ARGS__)
 int xregn(char device, char channel, unsigned char address, unsigned count,
           ...);
 void xram0_read(void *dest, unsigned src, unsigned count);

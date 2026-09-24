@@ -6,7 +6,7 @@
 int rename(const char *oldpath, const char *newpath) {
   size_t oldpathlen = strlen(oldpath);
   size_t newpathlen = strlen(newpath);
-  if (oldpathlen + newpathlen > 510) {
+  if ((oldpathlen | newpathlen) > 255) {
     errno = EINVAL;
     return -1;
   }

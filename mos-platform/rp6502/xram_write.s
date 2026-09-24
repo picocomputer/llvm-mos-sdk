@@ -13,9 +13,21 @@ xram0_write:
     stx RIA_ADDR0+1
     lda #1
     sta RIA_STEP0
-    ldy #0
     ldx __rc5
-    beq .Lxram0_write_tail
+    inx
+    lda __rc4                   ; the whole eights of the partial page
+    and #$F8
+    tay
+    beq .Lxram0_write_next
+    clc                         ; start 256 - Y bytes back so Y wraps at the end
+    adc __rc2
+    sta __rc2
+    bcs 1f
+    dec __rc3
+1:  tya
+    eor #$FF
+    tay
+    iny
 .Lxram0_write_page:
     .rept 8
     lda (__rc2),y
@@ -24,13 +36,12 @@ xram0_write:
     .endr
     bne .Lxram0_write_page
     inc __rc3
+.Lxram0_write_next:
     dex
     bne .Lxram0_write_page
-.Lxram0_write_tail:
     lda __rc4
-    beq .Lxram0_write_done
     and #7
-    beq .Lxram0_write_eights
+    beq .Lxram0_write_done
     tax
 .Lxram0_write_rest:
     lda (__rc2),y
@@ -38,21 +49,6 @@ xram0_write:
     iny
     dex
     bne .Lxram0_write_rest
-.Lxram0_write_eights:
-    lda __rc4
-    lsr
-    lsr
-    lsr
-    beq .Lxram0_write_done
-    tax
-.Lxram0_write_eight:
-    .rept 8
-    lda (__rc2),y
-    sta RIA_RW0
-    iny
-    .endr
-    dex
-    bne .Lxram0_write_eight
 .Lxram0_write_done:
     rts
 .size xram0_write, .-xram0_write
@@ -65,9 +61,21 @@ xram1_write:
     stx RIA_ADDR1+1
     lda #1
     sta RIA_STEP1
-    ldy #0
     ldx __rc5
-    beq .Lxram1_write_tail
+    inx
+    lda __rc4                   ; the whole eights of the partial page
+    and #$F8
+    tay
+    beq .Lxram1_write_next
+    clc                         ; start 256 - Y bytes back so Y wraps at the end
+    adc __rc2
+    sta __rc2
+    bcs 1f
+    dec __rc3
+1:  tya
+    eor #$FF
+    tay
+    iny
 .Lxram1_write_page:
     .rept 8
     lda (__rc2),y
@@ -76,13 +84,12 @@ xram1_write:
     .endr
     bne .Lxram1_write_page
     inc __rc3
+.Lxram1_write_next:
     dex
     bne .Lxram1_write_page
-.Lxram1_write_tail:
     lda __rc4
-    beq .Lxram1_write_done
     and #7
-    beq .Lxram1_write_eights
+    beq .Lxram1_write_done
     tax
 .Lxram1_write_rest:
     lda (__rc2),y
@@ -90,21 +97,6 @@ xram1_write:
     iny
     dex
     bne .Lxram1_write_rest
-.Lxram1_write_eights:
-    lda __rc4
-    lsr
-    lsr
-    lsr
-    beq .Lxram1_write_done
-    tax
-.Lxram1_write_eight:
-    .rept 8
-    lda (__rc2),y
-    sta RIA_RW1
-    iny
-    .endr
-    dex
-    bne .Lxram1_write_eight
 .Lxram1_write_done:
     rts
 .size xram1_write, .-xram1_write

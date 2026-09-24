@@ -10,8 +10,6 @@ size_t strftime(char *s, size_t maxsize, const char *format,
   int ax;
   unsigned i;
   size_t len = strlen(format);
-  if (maxsize == 0)
-    return 0;
   if (len > 255) {
     errno = EINVAL;
     return 0;

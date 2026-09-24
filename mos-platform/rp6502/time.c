@@ -8,7 +8,7 @@ time_t time(time_t *timep) {
   else {
     unsigned long lo = ria_pop_long();
     unsigned long hi = ria_pop_long();
-    t = (time_t)hi << 32 | lo;
+    t = (time_t)((unsigned long long)hi << 32 | lo);
   }
   if (timep)
     *timep = t;

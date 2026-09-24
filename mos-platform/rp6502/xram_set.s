@@ -13,47 +13,37 @@ xram0_set:
     stx RIA_ADDR0+1
     lda #1
     sta RIA_STEP0
-    lda __rc2
-    ldx __rc4
-    beq .Lxram0_set_tail
-.Lxram0_set_page:
-    ldy #16
-.Lxram0_set_pg:
-    .rept 16
-    sta RIA_RW0
-    .endr
-    dey
-    bne .Lxram0_set_pg
-    dex
-    bne .Lxram0_set_page
-.Lxram0_set_tail:
-    ldy __rc3
-    beq .Lxram0_set_done
-    tya
+    lda __rc3
     and #15
-    beq .Lxram0_set_sixteens
+    beq .Lxram0_set_blocks
     tax
     lda __rc2
 .Lxram0_set_rest:
     sta RIA_RW0
     dex
     bne .Lxram0_set_rest
-.Lxram0_set_sixteens:
-    tya
+.Lxram0_set_blocks:             ; the partial page, then whole pages
+    ldx __rc4
+    inx
+    lda __rc3
     lsr
     lsr
     lsr
     lsr
-    beq .Lxram0_set_done
-    tax
+    tay
     lda __rc2
-.Lxram0_set_blk:
+    cpy #0
+    beq .Lxram0_set_next
+.Lxram0_set_pg:
     .rept 16
     sta RIA_RW0
     .endr
+    dey
+    bne .Lxram0_set_pg
+.Lxram0_set_next:
+    ldy #16
     dex
-    bne .Lxram0_set_blk
-.Lxram0_set_done:
+    bne .Lxram0_set_pg
     rts
 .size xram0_set, .-xram0_set
 
@@ -65,46 +55,36 @@ xram1_set:
     stx RIA_ADDR1+1
     lda #1
     sta RIA_STEP1
-    lda __rc2
-    ldx __rc4
-    beq .Lxram1_set_tail
-.Lxram1_set_page:
-    ldy #16
-.Lxram1_set_pg:
-    .rept 16
-    sta RIA_RW1
-    .endr
-    dey
-    bne .Lxram1_set_pg
-    dex
-    bne .Lxram1_set_page
-.Lxram1_set_tail:
-    ldy __rc3
-    beq .Lxram1_set_done
-    tya
+    lda __rc3
     and #15
-    beq .Lxram1_set_sixteens
+    beq .Lxram1_set_blocks
     tax
     lda __rc2
 .Lxram1_set_rest:
     sta RIA_RW1
     dex
     bne .Lxram1_set_rest
-.Lxram1_set_sixteens:
-    tya
+.Lxram1_set_blocks:             ; the partial page, then whole pages
+    ldx __rc4
+    inx
+    lda __rc3
     lsr
     lsr
     lsr
     lsr
-    beq .Lxram1_set_done
-    tax
+    tay
     lda __rc2
-.Lxram1_set_blk:
+    cpy #0
+    beq .Lxram1_set_next
+.Lxram1_set_pg:
     .rept 16
     sta RIA_RW1
     .endr
+    dey
+    bne .Lxram1_set_pg
+.Lxram1_set_next:
+    ldy #16
     dex
-    bne .Lxram1_set_blk
-.Lxram1_set_done:
+    bne .Lxram1_set_pg
     rts
 .size xram1_set, .-xram1_set
