@@ -20,19 +20,15 @@ asm(".section .init.220,\"ax\",@progbits\n"
 
 void __do_initmainargs(void) {
   int size = ria_call_int(RIA_OP_ARGV);
-  if (size <= 0)
-    return;
-
-  void *buf = __argv_mem((size_t)(unsigned int)size);
+  void *buf = __argv_mem(size);
   if (!buf) {
-    RIA.op = RIA_OP_ZXSTACK;
+    ria_drop();
     return;
   }
 
   /* Pop all bytes from xstack into buf, in order. */
   unsigned char *p = (unsigned char *)buf;
-  unsigned int n = (unsigned int)size;
-  while (n--)
+  while (size--)
     *p++ = ria_pop_char();
 
   /* Relocate the offset table at the head of buf.
@@ -44,10 +40,8 @@ void __do_initmainargs(void) {
   for (;;) {
     uint16_t offset =
         (uint16_t)raw[argc * 2] | ((uint16_t)raw[argc * 2 + 1] << 8);
-    if (!offset) {
-      ptrs[argc] = NULL;
+    if (!offset)
       break;
-    }
     ptrs[argc] = (char *)buf + offset;
     argc++;
   }

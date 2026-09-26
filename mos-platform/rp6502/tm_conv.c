@@ -7,8 +7,6 @@ static struct tm tm_buf;
 
 struct tm *__tm_conv(const time_t *timep, unsigned char op) {
   unsigned i;
-  if (!timep)
-    return 0;
   ria_push_long((unsigned long)(*timep >> 32));
   ria_push_long((unsigned long)*timep);
   if (ria_call_int(op) < 0)
