@@ -66,13 +66,13 @@ add_platform_library(rp6502-c
   read.c
   remove.c
   rename.c
-  ria.s
   ria_attr.c
   ria_execl.c
   ria_execv.c
   ria_rln_lastkey.c
   ria_rln_peek.c
   ria_rln_poke.c
+  ria_spin.s
   rmdir.c
   sleep.c
   strftime.c

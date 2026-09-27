@@ -13,11 +13,12 @@ int rmdir(const char *name) {
     return -1;
   }
   while (namelen)
-    ria_push_char(name[--namelen]);
-  if (ria_call_int(RIA_OP_STAT) < 0)
+    RIA.xstack = name[--namelen];
+  RIA.op = RIA_OP_STAT;
+  if (ria_spin() < 0)
     return -1;
   while (i--)
-    attr = ria_pop_char();
+    attr = RIA.xstack;
   ria_drop();
   if (!(attr & 0x10)) {
     errno = EINVAL;

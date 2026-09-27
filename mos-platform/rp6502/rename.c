@@ -11,9 +11,10 @@ int rename(const char *oldpath, const char *newpath) {
     return -1;
   }
   while (oldpathlen)
-    ria_push_char(oldpath[--oldpathlen]);
-  ria_push_char(0);
+    RIA.xstack = oldpath[--oldpathlen];
+  RIA.xstack = 0;
   while (newpathlen)
-    ria_push_char(newpath[--newpathlen]);
-  return ria_call_int(RIA_OP_RENAME);
+    RIA.xstack = newpath[--newpathlen];
+  RIA.op = RIA_OP_RENAME;
+  return ria_spin();
 }

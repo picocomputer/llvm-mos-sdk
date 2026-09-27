@@ -19,7 +19,8 @@ asm(".section .init.220,\"ax\",@progbits\n"
     "  jsr __do_initmainargs\n");
 
 void __do_initmainargs(void) {
-  int size = ria_call_int(RIA_OP_ARGV);
+  RIA.op = RIA_OP_ARGV;
+  int size = ria_spin();
   void *buf = __argv_mem(size);
   if (!buf) {
     ria_drop();
@@ -29,7 +30,7 @@ void __do_initmainargs(void) {
   /* Pop all bytes from xstack into buf, in order. */
   unsigned char *p = (unsigned char *)buf;
   while (size--)
-    *p++ = ria_pop_char();
+    *p++ = RIA.xstack;
 
   /* Relocate the offset table at the head of buf.
    * The RIA stores 2-byte little-endian offsets relative to buf start.

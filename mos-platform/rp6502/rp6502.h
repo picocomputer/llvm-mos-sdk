@@ -53,32 +53,10 @@ struct __RP6502 {
 };
 #define RIA (*(volatile struct __RP6502 *)0xFFE0)
 
-#define RIA_READY_TX_BIT 0x80
-#define RIA_READY_RX_BIT 0x40
-#define RIA_BUSY_BIT 0x80
-
-/* XSTACK helpers */
-
-void ria_push_long(unsigned long val);
-void ria_push_int(unsigned int val);
-#define ria_push_char(v) (RIA.xstack = (v))
-
-long ria_pop_long(void);
-int ria_pop_int(void);
-#define ria_pop_char() (RIA.xstack)
-
-#define ria_drop() ((void)(RIA.op = RIA_OP_DROP_XSTACK))
-
-/* Set the RIA fastcall register */
-
-void ria_set_axsreg(unsigned long axsreg);
-void ria_set_ax(unsigned int ax);
-#define ria_set_a(v) (RIA.a = (v))
-
-/* Run an OS operation */
-
-int ria_call_int(unsigned char op);
-long ria_call_long(unsigned char op);
+__attribute__((leaf)) int ria_spin(void);
+static inline unsigned char ria_vsync(void) { return RIA.vsync; }
+static inline unsigned char ria_irq_read(void) { return RIA.irq; }
+static inline void ria_irq_write(unsigned char mask) { RIA.irq = mask; }
 
 /* OS operation numbers */
 
@@ -126,6 +104,8 @@ long ria_call_long(unsigned char op);
 #define RIA_OP_STRFTIME 0x3D
 #define RIA_OP_TIME_SET 0x3E
 #define RIA_OP_TIME_GET 0x3F
+
+static inline void ria_drop(void) { RIA.op = RIA_OP_DROP_XSTACK; }
 
 /* RIA attribute IDs */
 
@@ -204,49 +184,53 @@ void xram0_set(unsigned dest, unsigned char val, unsigned count);
 void xram1_set(unsigned dest, unsigned char val, unsigned count);
 void xram_move(unsigned dest, unsigned src, unsigned count);
 
-#define xram0_struct_set(addr, type, member, val)                              \
-  do {                                                                         \
-    RIA.addr0 = (unsigned)(&((type *)0)->member) + (unsigned)(addr);           \
-    switch (sizeof(((type *)0)->member)) {                                     \
-    case 1:                                                                    \
-      RIA.rw0 = (val);                                                         \
-      break;                                                                   \
-    case 2:                                                                    \
-      RIA.step0 = 1;                                                           \
-      RIA.rw0 = (val) & 0xff;                                                  \
-      RIA.rw0 = ((val) >> 8) & 0xff;                                           \
-      break;                                                                   \
-    case 4:                                                                    \
-      RIA.step0 = 1;                                                           \
-      RIA.rw0 = (unsigned long)(val) & 0xff;                                   \
-      RIA.rw0 = ((unsigned long)(val) >> 8) & 0xff;                            \
-      RIA.rw0 = ((unsigned long)(val) >> 16) & 0xff;                           \
-      RIA.rw0 = ((unsigned long)(val) >> 24) & 0xff;                           \
-      break;                                                                   \
-    }                                                                          \
-  } while (0)
+static inline unsigned char xram0_peek8(unsigned addr) {
+  RIA.addr0 = addr;
+  return RIA.rw0;
+}
 
-#define xram1_struct_set(addr, type, member, val)                              \
-  do {                                                                         \
-    RIA.addr1 = (unsigned)(&((type *)0)->member) + (unsigned)(addr);           \
-    switch (sizeof(((type *)0)->member)) {                                     \
-    case 1:                                                                    \
-      RIA.rw1 = (val);                                                         \
-      break;                                                                   \
-    case 2:                                                                    \
-      RIA.step1 = 1;                                                           \
-      RIA.rw1 = (val) & 0xff;                                                  \
-      RIA.rw1 = ((val) >> 8) & 0xff;                                           \
-      break;                                                                   \
-    case 4:                                                                    \
-      RIA.step1 = 1;                                                           \
-      RIA.rw1 = (unsigned long)(val) & 0xff;                                   \
-      RIA.rw1 = ((unsigned long)(val) >> 8) & 0xff;                            \
-      RIA.rw1 = ((unsigned long)(val) >> 16) & 0xff;                           \
-      RIA.rw1 = ((unsigned long)(val) >> 24) & 0xff;                           \
-      break;                                                                   \
-    }                                                                          \
-  } while (0)
+static inline unsigned char xram1_peek8(unsigned addr) {
+  RIA.addr1 = addr;
+  return RIA.rw1;
+}
+
+static inline unsigned xram0_peek16(unsigned addr) {
+  RIA.addr0 = addr;
+  RIA.step0 = 1;
+  unsigned char lo = RIA.rw0;
+  return lo | (unsigned)RIA.rw0 << 8;
+}
+
+static inline unsigned xram1_peek16(unsigned addr) {
+  RIA.addr1 = addr;
+  RIA.step1 = 1;
+  unsigned char lo = RIA.rw1;
+  return lo | (unsigned)RIA.rw1 << 8;
+}
+
+static inline void xram0_poke8(unsigned addr, unsigned char val) {
+  RIA.addr0 = addr;
+  RIA.rw0 = val;
+}
+
+static inline void xram1_poke8(unsigned addr, unsigned char val) {
+  RIA.addr1 = addr;
+  RIA.rw1 = val;
+}
+
+static inline void xram0_poke16(unsigned addr, unsigned val) {
+  RIA.addr0 = addr;
+  RIA.step0 = 1;
+  RIA.rw0 = val;
+  RIA.rw0 = val >> 8;
+}
+
+static inline void xram1_poke16(unsigned addr, unsigned val) {
+  RIA.addr1 = addr;
+  RIA.step1 = 1;
+  RIA.rw1 = val;
+  RIA.rw1 = val >> 8;
+}
 
 #ifdef __cplusplus
 }
