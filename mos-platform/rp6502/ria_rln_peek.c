@@ -2,13 +2,14 @@
 
 int ria_rln_peek(char *peek, unsigned char *pos) {
   int i, ax;
-  ax = ria_call_int(RIA_OP_RLN_PEEK);
+  RIA.op = RIA_OP_RLN_PEEK;
+  ax = ria_spin();
   if (ax < 0) {
     return ax;
   }
-  *pos = ria_pop_char();
+  *pos = RIA.xstack;
   for (i = 0; i < ax; i++) {
-    peek[i] = ria_pop_char();
+    peek[i] = RIA.xstack;
   }
   peek[ax] = 0;
   return ax;
