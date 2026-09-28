@@ -54,6 +54,7 @@ add_platform_library(rp6502-c
   getchar.c
   getcwd.c
   gmtime.c
+  isatty.c
   localtime.c
   lseek.c
   mainargs.c
