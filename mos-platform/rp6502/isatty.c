@@ -1,4 +1,10 @@
 #include <unistd.h>
+#include "rp6502.h"
 
-// stdin, stdout, stderr, CON: and TTY: are descriptors 0 to 4, all the console.
-int isatty(int fd) { return (unsigned)fd < 5; }
+// 1 for the console, CON: or TTY:, on any descriptor. A closed one is -1
+// with errno set, and is not a terminal either.
+int isatty(int fd) {
+  RIA.a = fd;
+  RIA.op = RIA_OP_ISATTY;
+  return ria_spin() > 0;
+}

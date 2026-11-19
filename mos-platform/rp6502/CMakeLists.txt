@@ -34,6 +34,8 @@ add_platform_library(rp6502-c
   close.c
   creat.c
   ctime.c
+  dup.c
+  dup2.c
   errno.s
   f_chmod.c
   f_closedir.c

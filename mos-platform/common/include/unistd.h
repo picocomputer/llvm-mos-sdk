@@ -74,6 +74,8 @@ int read(int fd, void* buf, unsigned count);
 off_t lseek(int fd, off_t offset, int whence);
 int syncfs (int fd);
 int isatty(int fd);
+int dup(int fd);
+int dup2(int fd, int fd2);
 int unlink(const char* name);     /* Same as remove() */
 
 /* Directories */
